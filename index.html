@@ -1,28 +1,3160 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cash Management — MD Kaif</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><style>
-:root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#e4e7ec;--blue:#315efb;--dark:#101828;--green:#087443;--red:#b42318}*{box-sizing:border-box}body{margin:0;font:14px Segoe UI,Arial;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}.app{display:flex;min-height:100vh}.side{width:235px;background:var(--dark);color:white;padding:20px 13px;position:fixed;height:100vh}.brand{padding:5px 10px 22px;border-bottom:1px solid #263244}.brand b{font-size:20px}.brand small{display:block;color:#98a2b3;margin-top:4px}.nav{margin-top:15px}.nav button{width:100%;border:0;background:transparent;color:#cbd5e1;text-align:left;padding:11px 12px;border-radius:8px;margin:2px 0;font-weight:600}.nav button.active,.nav button:hover{background:#1d2939;color:#fff}.nav label{display:block;color:#667085;font-size:10px;letter-spacing:1px;margin:18px 12px 6px;text-transform:uppercase}.main{margin-left:235px;padding:25px;width:calc(100% - 235px)}.top{display:flex;justify-content:space-between;gap:15px;margin-bottom:20px}.top h1{margin:0;font-size:25px}.top p{margin:5px 0;color:var(--muted)}.btn{border:1px solid #d0d5dd;background:#fff;padding:9px 13px;border-radius:8px;font-weight:650;cursor:pointer}.primary{background:var(--blue);border-color:var(--blue);color:white}.danger{color:var(--red)}.page{display:none}.page.active{display:block}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:13px;box-shadow:0 5px 22px #1018280d}.card{padding:17px}.card small{color:var(--muted);font-weight:650}.card b{display:block;font-size:23px;margin-top:8px}.panel{overflow:hidden}.ph{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center}.ph h2{font-size:15px;margin:0}.toolbar{padding:13px 17px;display:flex;gap:9px;align-items:end;flex-wrap:wrap;border-bottom:1px solid var(--line)}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:11px;font-weight:650;color:#475467}.field input,.field select,.field textarea{border:1px solid #d0d5dd;border-radius:7px;padding:9px;background:#fff}.tablewrap{overflow:auto}.table{border-collapse:collapse;width:100%;min-width:980px}.table th,.table td{padding:10px 11px;border-bottom:1px solid #eef0f3;text-align:right;white-space:nowrap;font-size:12px}.table th{background:#f8fafc;color:#475467;font-size:11px}.table th:first-child,.table td:first-child{text-align:left}.strong{font-weight:750}.green{color:var(--green)}.empty{text-align:center;padding:35px;color:var(--muted)}.modal{display:none;position:fixed;inset:0;background:#10182880;z-index:20;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.box{width:min(620px,100%);background:white;border-radius:14px;max-height:92vh;overflow:auto}.mh,.mf{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.mf{border-top:1px solid var(--line);border-bottom:0;justify-content:flex-end;gap:8px}.mb{padding:20px}.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.close{border:0;background:transparent;font-size:22px}.toast{position:fixed;right:20px;bottom:20px;background:#101828;color:#fff;padding:12px 15px;border-radius:8px;display:none;z-index:30}.toast.show{display:block}.tabs{display:flex;gap:6px}.tabs button.active{background:#101828;color:white}.help{font-size:11px;color:var(--muted);line-height:1.5}@media(max-width:850px){.side{display:none}.main{margin:0;width:100%;padding:16px}.cards{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}.full{grid-column:auto}.top{flex-direction:column}}
-</style></head><body><div class="app"><aside class="side"><div class="brand"><b>MD Kaif</b><small>Cash Management</small></div><nav class="nav"><label>Workspace</label><button data-p="overview" class="active">Overview</button><button data-p="daily">Daily Cash</button><button data-p="sales">Sales</button><button data-p="expenses">Expenses</button><button data-p="due">Due Receipts</button><button data-p="movements">Cash Movement</button><label>Reports & Data</label><button data-p="reports">Reports</button><button data-p="import">Import / Export</button></nav></aside><main class="main"><header class="top"><div><h1 id="title">Cash Management</h1><p id="sub">Daily cash, sales and expense management</p></div><div><button class="btn" onclick="refresh()">↻ Refresh</button> <button class="btn primary" onclick="openForm('sale')">+ Add Sale</button></div></header>
-<section id="overview" class="page active"><div class="cards"><div class="card"><small>Today's Sale</small><b id="csale">₹0.00</b></div><div class="card"><small>Current Cash</small><b id="ccash">₹0.00</b></div><div class="card"><small>Due Received Today</small><b id="cdue">₹0.00</b></div><div class="card"><small>Today's Expense</small><b id="cexp">₹0.00</b></div></div><div class="panel"><div class="ph"><h2>Daily Cash Register</h2><button class="btn" onclick="go('daily')">Open Full Register →</button></div><div class="tablewrap"><table class="table"><thead id="oh"></thead><tbody id="ob"></tbody></table></div></div></section>
-<section id="daily" class="page"><div class="panel"><div class="ph"><h2>Daily Cash Register</h2><div><button class="btn primary" onclick="openForm('sale')">+ Sale</button> <button class="btn" onclick="openForm('expense')">+ Expense</button> <button class="btn" onclick="openForm('due')">+ Due Receipt</button> <button class="btn" onclick="openForm('movement')">+ Cash Movement</button></div></div><div class="toolbar"><div class="field"><label>From</label><input id="df" type="date"></div><div class="field"><label>To</label><input id="dt" type="date"></div><button class="btn" onclick="loadDaily()">Apply</button><button class="btn" onclick="todayFilter()">Today</button></div><div class="tablewrap"><table class="table"><thead id="dh"></thead><tbody id="db"></tbody></table></div></div></section>
-<section id="sales" class="page"><div class="panel"><div class="ph"><h2>Sales</h2><button class="btn primary" onclick="openForm('sale')">+ Add Sale</button></div><div class="toolbar"><div class="field"><label>From</label><input id="sf" type="date"></div><div class="field"><label>To</label><input id="st" type="date"></div><button class="btn" onclick="loadSales()">Apply</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Date</th><th>Total</th><th>Cash</th><th>Online/UPI</th><th>Due</th><th>Remark</th><th>Action</th></tr></thead><tbody id="sb"></tbody></table></div></div></section>
-<section id="expenses" class="page"><div class="panel"><div class="ph"><h2>Expenses</h2><button class="btn primary" onclick="openForm('expense')">+ Add Expense</button></div><div class="toolbar"><div class="field"><label>From</label><input id="ef" type="date"></div><div class="field"><label>To</label><input id="et" type="date"></div><button class="btn" onclick="loadExpenses()">Apply</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Date</th><th>Amount</th><th>Mode</th><th>Category</th><th>Remark</th><th>Action</th></tr></thead><tbody id="eb"></tbody></table></div></div></section>
-<section id="due" class="page"><div class="panel"><div class="ph"><h2>Due Receipts</h2><button class="btn primary" onclick="openForm('due')">+ Add Due Receipt</button></div><div class="toolbar"><div class="field"><label>Receipt From</label><input id="uf" type="date"></div><div class="field"><label>Receipt To</label><input id="ut" type="date"></div><button class="btn" onclick="loadDue()">Apply</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Receipt Date</th><th>Against Sale</th><th>Amount</th><th>Mode</th><th>Receipt No.</th><th>Remark</th><th>Action</th></tr></thead><tbody id="ub"></tbody></table></div></div></section>
-<section id="movements" class="page"><div class="panel"><div class="ph"><h2>Cash Movement</h2><button class="btn primary" onclick="openForm('movement')">+ Add Cash Movement</button></div><div class="toolbar"><div class="field"><label>From</label><input id="mf" type="date"></div><div class="field"><label>To</label><input id="mt" type="date"></div><button class="btn" onclick="loadMovements()">Apply</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Date</th><th>Movement</th><th>Amount</th><th>Remark</th><th>Action</th></tr></thead><tbody id="mbody"></tbody></table></div></div></section>
-<section id="reports" class="page"><div class="panel"><div class="ph"><h2>Reports</h2><div class="tabs"><button id="rd" class="btn active" onclick="report('daily')">Daily</button><button id="rm" class="btn" onclick="report('monthly')">Monthly</button><button id="ry" class="btn" onclick="report('yearly')">Yearly</button></div></div><div class="tablewrap"><table class="table"><thead id="rh"></thead><tbody id="rb"></tbody></table></div></div></section>
-<section id="import" class="page"><div class="panel"><div class="ph"><h2>Import / Export</h2></div><div class="mb"><div class="field"><label>Excel / CSV file</label><input id="file" type="file" accept=".xlsx,.xls,.csv"></div><p class="help">Use sheets named Sales, Expenses, Due Receipts and Cash Movements. Keep database field names as column headers for safest import.</p><button class="btn primary" onclick="importXlsx()">Import Excel</button> <button class="btn" onclick="exportXlsx()">Export Excel</button></div></div></section></main></div>
-<div class="modal" id="modal"><div class="box"><div class="mh"><b id="mtitle">Add</b><button class="close" onclick="closeForm()">×</button></div><div class="mb" id="mform"></div><div class="mf"><button class="btn" onclick="closeForm()">Cancel</button><button class="btn primary" id="save">Save</button></div></div></div><div id="toast" class="toast"></div>
-<script>
-const URL='https://ywvdozdoanmcxscfofcf.supabase.co',KEY='sb_publishable_aAqO96BmDbYivhlgl_3z7g_1orXAscB',db=supabase.createClient(URL,KEY);const $=id=>document.getElementById(id),money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),fd=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'',today=()=>new Date().toISOString().slice(0,10);
-const meta={overview:['Cash Management','Daily cash, sales and expense management'],daily:['Daily Cash','Complete date-wise cash register'],sales:['Sales','Original daily sales — never overwritten by due receipts'],expenses:['Expenses','Cash and Online/UPI expenses'],due:['Due Receipts','Receive old outstanding amounts without changing original sale'],movements:['Cash Movement','Bank deposits and owner handovers'],reports:['Reports','Daily, monthly and yearly summaries'],import:['Import / Export','Bulk Excel data management']};
-function toast(x,err=false){$('toast').textContent=x;$('toast').style.background=err?'#b42318':'#101828';$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2800)}function go(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(p).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.p===p));$('title').textContent=meta[p][0];$('sub').textContent=meta[p][1];({overview:loadOverview,daily:loadDaily,sales:loadSales,expenses:loadExpenses,due:loadDue,movements:loadMovements,reports:()=>report('daily')}[p]||(()=>{}))()}document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
-function dates(){['df','sf','ef','uf','mf'].forEach(x=>$(x).value=today());['dt','st','et','ut','mt'].forEach(x=>$(x).value=today())}dates();
-async function daily(f,t){let q=db.from('cash_daily_report').select('*').order('date',{ascending:false});if(f)q=q.gte('date',f);if(t)q=q.lte('date',t);let r=await q;if(r.error)throw r.error;return r.data||[]}function dhead(){return '<tr><th>Date</th><th>Sale</th><th>Cash Sale</th><th>Online/UPI</th><th>Expense</th><th>Due Received</th><th>Bank Deposit</th><th>Owner Handover</th><th>Current Sale</th><th>Current Cash</th></tr>'}function drows(a){return a.length?a.map(r=>`<tr><td>${fd(r.date)}</td><td class="strong">${money(r.sale)}</td><td>${money(r.cash_sale)}</td><td>${money(r.online_upi)}</td><td>${money(r.expense)}</td><td>${money(r.due_receipt)}</td><td>${money(r.bank_deposit)}</td><td>${money(r.owner_handover)}</td><td class="strong">${money(r.current_sale)}</td><td class="strong green">${money(r.current_cash)}</td></tr>`).join(''):'<tr><td colspan="10"><div class="empty">No transactions found.</div></td></tr>'}
-async function loadOverview(){try{let a=await daily(today(),today()),r=a[0]||{};$('csale').textContent=money(r.sale);$('ccash').textContent=money(r.current_cash);$('cdue').textContent=money(r.due_receipt);$('cexp').textContent=money(r.expense);$('oh').innerHTML=dhead();$('ob').innerHTML=drows(a)}catch(e){toast(e.message,true)}}async function loadDaily(){try{let a=await daily($('df').value,$('dt').value);$('dh').innerHTML=dhead();$('db').innerHTML=drows(a)}catch(e){toast(e.message,true)}}function todayFilter(){dates();loadDaily()}
-async function list(table,from,to,datecol,body,cols,actions){let q=db.from(table).select('*').order(datecol,{ascending:false});if(from)q=q.gte(datecol,from);if(to)q=q.lte(datecol,to);let r=await q;if(r.error)throw r.error;$(body).innerHTML=r.data.length?r.data.map(x=>`<tr>${cols(x)}<td>${actions(x)}</td></tr>`).join(''):`<tr><td colspan="${cols({}).match(/<td/g)?.length+1||5}><div class="empty">No records found.</div></td></tr>`}
-function act(t,r,fn){return `<button class="btn" onclick='edit${t}(${JSON.stringify(r)})'>Edit</button> <button class="btn danger" onclick="del('${t}','${r.id}','${fn}')">Delete</button>`}async function loadSales(){try{await list('cash_daily_sales',$('sf').value,$('st').value,'sale_date','sb',r=>`<td>${fd(r.sale_date)}</td><td class="strong">${money(r.total_sale)}</td><td>${money(r.cash_sale)}</td><td>${money(r.online_sale)}</td><td>${money(r.due_sale)}</td><td>${esc(r.remark)}</td>`,r=>act('Sale',r,'loadSales'))}catch(e){toast(e.message,true)}}async function loadExpenses(){try{await list('cash_expenses',$('ef').value,$('et').value,'expense_date','eb',r=>`<td>${fd(r.expense_date)}</td><td class="strong">${money(r.amount)}</td><td>${esc(r.payment_mode)}</td><td>${esc(r.category)}</td><td>${esc(r.remark)}</td>`,r=>act('Expense',r,'loadExpenses'))}catch(e){toast(e.message,true)}}async function loadDue(){try{await list('cash_due_receipts',$('uf').value,$('ut').value,'receipt_date','ub',r=>`<td>${fd(r.receipt_date)}</td><td>${fd(r.against_sale_date)}</td><td class="strong">${money(r.amount)}</td><td>${esc(r.payment_mode)}</td><td>${esc(r.receipt_no)}</td><td>${esc(r.remark)}</td>`,r=>act('Due',r,'loadDue'))}catch(e){toast(e.message,true)}}async function loadMovements(){try{await list('cash_movements',$('mf').value,$('mt').value,'movement_date','mbody',r=>`<td>${fd(r.movement_date)}</td><td>${esc(r.movement_type)}</td><td class="strong">${money(r.amount)}</td><td>${esc(r.remark)}</td>`,r=>act('Movement',r,'loadMovements'))}catch(e){toast(e.message,true)}}
-async function del(table,id,fn){if(!confirm('Delete this record?'))return;let r=await db.from(table).delete().eq('id',id);if(r.error)toast(r.error.message,true);else{toast('Record deleted');window[fn]();loadOverview()}}
-function openForm(type,r=null){$('modal').classList.add('show');$('mtitle').textContent=(r?'Edit ':'Add ')+({sale:'Sale',expense:'Expense',due:'Due Receipt',movement:'Cash Movement'}[type]);let h='';if(type==='sale')h=`<div class="form"><div class="field"><label>Sale Date *</label><input id="a" type="date" value="${r?.sale_date||today()}"></div><div class="field"><label>Total Sale *</label><input id="b" type="number" step=".01" value="${r?.total_sale??''}"></div><div class="field"><label>Cash Sale *</label><input id="c" type="number" step=".01" value="${r?.cash_sale??''}"></div><div class="field"><label>Online / UPI *</label><input id="d" type="number" step=".01" value="${r?.online_sale??''}"></div><div class="field"><label>Due Sale *</label><input id="e" type="number" step=".01" value="${r?.due_sale??''}"></div><div class="field full"><label>Remark</label><textarea id="f">${esc(r?.remark||'')}</textarea></div></div><p class="help">Cash + Online/UPI + Due must equal Total Sale.</p>`;if(type==='expense')h=`<div class="form"><div class="field"><label>Date *</label><input id="a" type="date" value="${r?.expense_date||today()}"></div><div class="field"><label>Amount *</label><input id="b" type="number" step=".01" value="${r?.amount??''}"></div><div class="field"><label>Payment Mode *</label><select id="c"><option ${r?.payment_mode==='Cash'?'selected':''}>Cash</option><option ${r?.payment_mode==='Online/UPI'?'selected':''}>Online/UPI</option></select></div><div class="field"><label>Category</label><input id="d" value="${esc(r?.category||'')}"></div><div class="field full"><label>Remark</label><textarea id="e">${esc(r?.remark||'')}</textarea></div></div>`;if(type==='due')h=`<div class="form"><div class="field"><label>Receipt Date *</label><input id="a" type="date" value="${r?.receipt_date||today()}"></div><div class="field"><label>Against Sale Date *</label><input id="b" type="date" value="${r?.against_sale_date||today()}"></div><div class="field"><label>Amount *</label><input id="c" type="number" step=".01" value="${r?.amount??''}"></div><div class="field"><label>Payment Mode *</label><select id="d"><option ${r?.payment_mode==='Cash'?'selected':''}>Cash</option><option ${r?.payment_mode==='Online/UPI'?'selected':''}>Online/UPI</option></select></div><div class="field"><label>Receipt No.</label><input id="e" value="${esc(r?.receipt_no||'')}"></div><div class="field"><label>Remark</label><input id="f" value="${esc(r?.remark||'')}"></div></div><p class="help">This never changes the original sale.</p>`;if(type==='movement')h=`<div class="form"><div class="field"><label>Date *</label><input id="a" type="date" value="${r?.movement_date||today()}"></div><div class="field"><label>Movement Type *</label><select id="b"><option ${r?.movement_type==='Cash Deposit in Bank'?'selected':''}>Cash Deposit in Bank</option><option ${r?.movement_type==='Cash Handover to Owner'?'selected':''}>Cash Handover to Owner</option></select></div><div class="field"><label>Amount *</label><input id="c" type="number" step=".01" value="${r?.amount??''}"></div><div class="field"><label>Remark</label><input id="d" value="${esc(r?.remark||'')}"></div></div>`;$('mform').innerHTML=h;$('save').onclick=()=>save(type,r)}function closeForm(){$('modal').classList.remove('show')}
-async function save(type,r){let table,p;if(type==='sale'){table='cash_daily_sales';p={sale_date:$('a').value,total_sale:+$('b').value,cash_sale:+$('c').value,online_sale:+$('d').value,due_sale:+$('e').value,remark:$('f').value};if(Math.round((p.cash_sale+p.online_sale+p.due_sale)*100)!==Math.round(p.total_sale*100))return toast('Cash + Online/UPI + Due must equal Total Sale.',true)}if(type==='expense'){table='cash_expenses';p={expense_date:$('a').value,amount:+$('b').value,payment_mode:$('c').value,category:$('d').value,remark:$('e').value}}if(type==='due'){table='cash_due_receipts';p={receipt_date:$('a').value,against_sale_date:$('b').value,amount:+$('c').value,payment_mode:$('d').value,receipt_no:$('e').value,remark:$('f').value}}if(type==='movement'){table='cash_movements';p={movement_date:$('a').value,movement_type:$('b').value,amount:+$('c').value,remark:$('d').value}}let q=r?db.from(table).update(p).eq('id',r.id):db.from(table).insert(p);let x=await q;if(x.error)toast(x.error.message,true);else{closeForm();toast(r?'Updated successfully':'Saved successfully');refresh()}}function editSale(r){openForm('sale',r)}function editExpense(r){openForm('expense',r)}function editDue(r){openForm('due',r)}function editMovement(r){openForm('movement',r)}
-async function report(type){document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));$('r'+(type==='daily'?'d':type==='monthly'?'m':'y')).classList.add('active');let table=type==='daily'?'cash_daily_report':type==='monthly'?'cash_monthly_report':'cash_yearly_report',ord=type==='daily'?'date':type==='monthly'?'month':'year';let q=await db.from(table).select('*').order(ord,{ascending:false});if(q.error)return toast(q.error.message,true);let a=q.data||[];if(type==='daily'){$('rh').innerHTML=dhead();$('rb').innerHTML=drows(a)}else{$('rh').innerHTML='<tr><th>'+ (type==='monthly'?'Month':'Year')+'</th><th>Sale</th><th>Cash</th><th>Online/UPI</th><th>Expense</th><th>Due Received</th><th>Bank Deposit</th><th>Owner Handover</th><th>Current Sale</th><th>Current Cash</th></tr>';$('rb').innerHTML=a.length?a.map(r=>`<tr><td>${type==='monthly'?esc(r.month_name):r.year}</td><td class="strong">${money(r.sale)}</td><td>${money(r.cash_sale)}</td><td>${money(r.online_upi)}</td><td>${money(r.expense)}</td><td>${money(r.due_receipt)}</td><td>${money(r.bank_deposit)}</td><td>${money(r.owner_handover)}</td><td class="strong">${money(r.current_sale)}</td><td class="strong green">${money(r.current_cash)}</td></tr>`).join(''):'<tr><td colspan="10"><div class="empty">No report data.</div></td></tr>'}}
-async function exportXlsx(){try{let a=await Promise.all(['cash_daily_sales','cash_expenses','cash_due_receipts','cash_movements'].map(t=>db.from(t).select('*')));if(a.some(x=>x.error))throw(a.find(x=>x.error).error);let w=XLSX.utils.book_new();[['Sales',a[0].data],['Expenses',a[1].data],['Due Receipts',a[2].data],['Cash Movements',a[3].data]].forEach(x=>XLSX.utils.book_append_sheet(w,XLSX.utils.json_to_sheet(x[1]||[]),x[0]));XLSX.writeFile(w,'Cash-Management-Export.xlsx');toast('Excel exported')}catch(e){toast(e.message,true)}}async function importXlsx(){let f=$('file').files[0];if(!f)return toast('Choose an Excel file first.',true);try{let w=XLSX.read(await f.arrayBuffer(),{type:'array'}),cfg=[['Sales','cash_daily_sales'],['Expenses','cash_expenses'],['Due Receipts','cash_due_receipts'],['Cash Movements','cash_movements']],n=0;for(let [s,t] of cfg)if(w.Sheets[s]){let rows=XLSX.utils.sheet_to_json(w.Sheets[s],{defval:''});if(rows.length){let x=await db.from(t).insert(rows);if(x.error)throw x.error;n+=rows.length}}toast(n+' records imported');refresh()}catch(e){toast(e.message,true)}}async function refresh(){loadOverview();let p=document.querySelector('.page.active')?.id;if(p==='daily')loadDaily();if(p==='sales')loadSales();if(p==='expenses')loadExpenses();if(p==='due')loadDue();if(p==='movements')loadMovements();if(p==='reports')report('daily')}
-loadOverview();
-</script></body></html>
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cash Management — MD Kaif</title>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Excel / CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        /* =========================================================
+           ROOT / GLOBAL
+        ========================================================= */
+
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --ink: #172033;
+            --muted: #667085;
+            --line: #e4e7ec;
+            --blue: #315efb;
+            --dark: #101828;
+            --green: #087443;
+            --red: #b42318;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            font-size: 14px;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* =========================================================
+           MAIN APP
+        ========================================================= */
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =========================================================
+           SIDEBAR
+        ========================================================= */
+
+        .side {
+            width: 235px;
+            background: var(--dark);
+            color: #ffffff;
+            padding: 20px 13px;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 10;
+        }
+
+        .brand {
+            padding: 5px 10px 22px;
+            border-bottom: 1px solid #263244;
+        }
+
+        .brand b {
+            font-size: 20px;
+        }
+
+        .brand small {
+            display: block;
+            color: #98a2b3;
+            margin-top: 4px;
+        }
+
+        .nav {
+            margin-top: 15px;
+        }
+
+        .nav button {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            color: #cbd5e1;
+            text-align: left;
+            padding: 11px 12px;
+            border-radius: 8px;
+            margin: 2px 0;
+            font-weight: 600;
+        }
+
+        .nav button:hover,
+        .nav button.active {
+            background: #1d2939;
+            color: #ffffff;
+        }
+
+        .nav label {
+            display: block;
+            color: #667085;
+            font-size: 10px;
+            letter-spacing: 1px;
+            margin: 18px 12px 6px;
+            text-transform: uppercase;
+        }
+
+        /* =========================================================
+           MAIN CONTENT
+        ========================================================= */
+
+        .main {
+            margin-left: 235px;
+            padding: 25px;
+            width: calc(100% - 235px);
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .top h1 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        .top p {
+            margin: 5px 0;
+            color: var(--muted);
+        }
+
+        /* =========================================================
+           BUTTONS
+        ========================================================= */
+
+        .btn {
+            border: 1px solid #d0d5dd;
+            background: #ffffff;
+            padding: 9px 13px;
+            border-radius: 8px;
+            font-weight: 650;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #f8fafc;
+        }
+
+        .primary {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #ffffff;
+        }
+
+        .primary:hover {
+            background: #244edc;
+        }
+
+        .danger {
+            color: var(--red);
+        }
+
+        /* =========================================================
+           PAGES
+        ========================================================= */
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* =========================================================
+           DASHBOARD CARDS
+        ========================================================= */
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .card,
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            box-shadow: 0 5px 22px #1018280d;
+        }
+
+        .card {
+            padding: 17px;
+        }
+
+        .card small {
+            color: var(--muted);
+            font-weight: 650;
+        }
+
+        .card b {
+            display: block;
+            font-size: 23px;
+            margin-top: 8px;
+        }
+
+        /* =========================================================
+           PANELS
+        ========================================================= */
+
+        .panel {
+            overflow: hidden;
+        }
+
+        .ph {
+            padding: 15px 17px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ph h2 {
+            font-size: 15px;
+            margin: 0;
+        }
+
+        /* =========================================================
+           TOOLBAR
+        ========================================================= */
+
+        .toolbar {
+            padding: 13px 17px;
+            display: flex;
+            gap: 9px;
+            align-items: end;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .field label {
+            font-size: 11px;
+            font-weight: 650;
+            color: #475467;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            border: 1px solid #d0d5dd;
+            border-radius: 7px;
+            padding: 9px;
+            background: #ffffff;
+        }
+
+        .field textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        /* =========================================================
+           TABLES
+        ========================================================= */
+
+        .tablewrap {
+            overflow: auto;
+        }
+
+        .table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 980px;
+        }
+
+        .table th,
+        .table td {
+            padding: 10px 11px;
+            border-bottom: 1px solid #eef0f3;
+            text-align: right;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+
+        .table th {
+            background: #f8fafc;
+            color: #475467;
+            font-size: 11px;
+        }
+
+        .table th:first-child,
+        .table td:first-child {
+            text-align: left;
+        }
+
+        .strong {
+            font-weight: 750;
+        }
+
+        .green {
+            color: var(--green);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px;
+            color: var(--muted);
+        }
+
+        /* =========================================================
+           MODAL
+        ========================================================= */
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #10182880;
+            z-index: 20;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .box {
+            width: min(620px, 100%);
+            background: #ffffff;
+            border-radius: 14px;
+            max-height: 92vh;
+            overflow: auto;
+        }
+
+        .mh,
+        .mf {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mf {
+            border-top: 1px solid var(--line);
+            border-bottom: 0;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .mb {
+            padding: 20px;
+        }
+
+        .form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        .close {
+            border: 0;
+            background: transparent;
+            font-size: 22px;
+        }
+
+        /* =========================================================
+           TOAST
+        ========================================================= */
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: #101828;
+            color: #ffffff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            display: none;
+            z-index: 30;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        /* =========================================================
+           REPORT TABS
+        ========================================================= */
+
+        .tabs {
+            display: flex;
+            gap: 6px;
+        }
+
+        .tabs button.active {
+            background: #101828;
+            color: #ffffff;
+        }
+
+        /* =========================================================
+           HELP TEXT
+        ========================================================= */
+
+        .help {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 850px) {
+
+            .side {
+                display: none;
+            }
+
+            .main {
+                margin: 0;
+                width: 100%;
+                padding: 16px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+
+            .top {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 500px) {
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .ph {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- =====================================================
+             SIDEBAR
+        ====================================================== -->
+
+        <aside class="side">
+
+            <div class="brand">
+                <b>MD Kaif</b>
+                <small>Cash Management</small>
+            </div>
+
+            <nav class="nav">
+
+                <label>Workspace</label>
+
+                <button data-p="overview" class="active">
+                    Overview
+                </button>
+
+                <button data-p="daily">
+                    Daily Cash
+                </button>
+
+                <button data-p="sales">
+                    Sales
+                </button>
+
+                <button data-p="expenses">
+                    Expenses
+                </button>
+
+                <button data-p="due">
+                    Due Receipts
+                </button>
+
+                <button data-p="movements">
+                    Cash Movement
+                </button>
+
+                <label>Reports & Data</label>
+
+                <button data-p="reports">
+                    Reports
+                </button>
+
+                <button data-p="import">
+                    Import / Export
+                </button>
+
+            </nav>
+        </aside>
+
+        <!-- =====================================================
+             MAIN
+        ====================================================== -->
+
+        <main class="main">
+
+            <!-- HEADER -->
+
+            <header class="top">
+
+                <div>
+                    <h1 id="title">
+                        Cash Management
+                    </h1>
+
+                    <p id="sub">
+                        Daily cash, sales and expense management
+                    </p>
+                </div>
+
+                <div>
+
+                    <button class="btn" onclick="refresh()">
+                        ↻ Refresh
+                    </button>
+
+                    <button class="btn primary" onclick="openForm('sale')">
+                        + Add Sale
+                    </button>
+
+                </div>
+
+            </header>
+
+            <!-- =================================================
+                 OVERVIEW
+            ================================================== -->
+
+            <section id="overview" class="page active">
+
+                <div class="cards">
+
+                    <div class="card">
+                        <small>Today's Sale</small>
+                        <b id="csale">₹0.00</b>
+                    </div>
+
+                    <div class="card">
+                        <small>Current Cash</small>
+                        <b id="ccash">₹0.00</b>
+                    </div>
+
+                    <div class="card">
+                        <small>Due Received Today</small>
+                        <b id="cdue">₹0.00</b>
+                    </div>
+
+                    <div class="card">
+                        <small>Today's Expense</small>
+                        <b id="cexp">₹0.00</b>
+                    </div>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="ph">
+
+                        <h2>
+                            Daily Cash Register
+                        </h2>
+
+                        <button class="btn" onclick="go('daily')">
+                            Open Full Register →
+                        </button>
+
+                    </div>
+
+                    <div class="tablewrap">
+
+                        <table class="table">
+
+                            <thead id="oh"></thead>
+
+                            <tbody id="ob"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 DAILY CASH
+            ================================================== -->
+
+            <section id="daily" class="page">
+
+                <div class="panel">
+
+                    <div class="ph">
+
+                        <h2>
+                            Daily Cash Register
+                        </h2>
+
+                        <div>
+
+                            <button class="btn primary" onclick="openForm('sale')">
+                                + Sale
+                            </button>
+
+                            <button class="btn" onclick="openForm('expense')">
+                                + Expense
+                            </button>
+
+                            <button class="btn" onclick="openForm('due')">
+                                + Due Receipt
+                            </button>
+
+                            <button class="btn" onclick="openForm('movement')">
+                                + Cash Movement
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="toolbar">
+
+                        <div class="field">
+                            <label>From</label>
+                            <input id="df" type="date">
+                        </div>
+
+                        <div class="field">
+                            <label>To</label>
+                            <input id="dt" type="date">
+                        </div>
+
+                        <button class="btn" onclick="loadDaily()">
+                            Apply
+                        </button>
+
+                        <button class="btn" onclick="todayFilter()">
+                            Today
+                        </button>
+
+                    </div>
+
+                    <div class="tablewrap">
+
+                        <table class="table">
+
+                            <thead id="dh"></thead>
+
+                            <tbody id="db"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 SALES
+            ================================================== -->
+
+            <section id="sales" class="page">
+
+                <div class="panel">
+
+                    <div class="ph">
+
+                        <h2>
+                            Sales
+                        </h2>
+
+                        <button class="btn primary" onclick="openForm('sale')">
+                            + Add Sale
+                        </button>
+
+                    </div>
+
+                    <div class="toolbar">
+
+                        <div class="field">
+                            <label>From</label>
+                            <input id="sf" type="date">
+                        </div>
+
+                        <div class="field">
+                            <label>To</label>
+                            <input id="st" type="date">
+                        </div>
+
+                        <button class="btn" onclick="loadSales()">
+                            Apply
+                        </button>
+
+                    </div>
+
+                    <div class="tablewrap">
+
+                        <table class="table">
+
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Total</th>
+                                    <th>Cash</th>
+                                    <th>Online/UPI</th>
+                                    <th>Due</th>
+                                    <th>Remark</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="sb"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 EXPENSES
+            ================================================== -->
+
+            <section id="expenses" class="page">
+
+                <div class="panel">
+
+                    <div class="ph">
+
+                        <h2>
+                            Expenses
+                        </h2>
+
+                        <button class="btn primary" onclick="openForm('expense')">
+                            + Add Expense
+                        </button>
+
+                    </div>
+
+                    <div class="toolbar">
+
+                        <div class="field">
+                            <label>From</label>
+                            <input id="ef" type="date">
+                        </div>
+
+                        <div class="field">
+                            <label>To</label>
+                            <input id="et" type="date">
+                        </div>
+
+                        <button class="btn" onclick="loadExpenses()">
+                            Apply
+                        </button>
+
+                    </div>
+
+                    <div class="tablewrap">
+
+                        <table class="table">
+
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Mode</th>
+                                    <th>Category</th>
+                                    <th>Remark</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="eb"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 DUE RECEIPTS
+            ================================================== -->
+
+            <section id="due" class="page">
+
+                <div class="panel">
+
+                    <div class="ph">
+
+                        <h2>
+                            Due Receipts
+                        </h2>
+
+                        <button class="btn primary" onclick="openForm('due')">
+                            + Add Due Receipt
+                        </button>
+
+                    </div>
+
+                    <div class="toolbar">
+
+                        <div class="field">
+                            <label>Receipt From</label>
+                            <input id="uf" type="date">
+                        </div>
+
+                        <div class="field">
+                            <label>Receipt To</label>
+                            <input id="ut" type="date">
+                        </div>
+
+                        <button class="btn" onclick="loadDue()">
+                            Apply
+                        </button>
+
+                    </div>
+
+                    <div class="tablewrap">
+
+                        <table class="table">
+
+                            <thead>
+                                <tr>
+                                    <th>Receipt Date</th>
+                                    <th>Against Sale</th>
+                                    <th>Amount</th>
+                                    <th>Mode</th>
+                                    <th>Receipt No.</th>
+                                    <th>Remark</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="ub"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 CASH MOVEMENTS
+            ================================================== -->
+
+            <section id="movements" class="page">
+
+                <div class="panel">
+
+                    <div class="ph">
+
+                        <h2>
+                            Cash Movement
+                        </h2>
+
+                        <button class="btn primary" onclick="openForm('movement')">
+                            + Add Cash Movement
+                        </button>
+
+                    </div>
+
+                    <div class="toolbar">
+
+                        <div class="field">
+                            <label>From</label>
+                            <input id="mf" type="date">
+                        </div>
+
+                        <div class="field">
+                            <label>To</label>
+                            <input id="mt" type="date">
+                        </div>
+
+                        <button class="btn" onclick="loadMovements()">
+                            Apply
+                        </button>
+
+                    </div>
+
+                    <div class="tablewrap">
+
+                        <table class="table">
+
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Movement</th>
+                                    <th>Amount</th>
+                                    <th>Remark</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="mbody"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 REPORTS
+            ================================================== -->
+
+            <section id="reports" class="page">
+
+                <div class="panel">
+
+                    <div class="ph">
+
+                        <h2>
+                            Reports
+                        </h2>
+
+                        <div class="tabs">
+
+                            <button id="rd"
+                                    class="btn active"
+                                    onclick="report('daily')">
+                                Daily
+                            </button>
+
+                            <button id="rm"
+                                    class="btn"
+                                    onclick="report('monthly')">
+                                Monthly
+                            </button>
+
+                            <button id="ry"
+                                    class="btn"
+                                    onclick="report('yearly')">
+                                Yearly
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="tablewrap">
+
+                        <table class="table">
+
+                            <thead id="rh"></thead>
+
+                            <tbody id="rb"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 IMPORT / EXPORT
+            ================================================== -->
+
+            <section id="import" class="page">
+
+                <div class="panel">
+
+                    <div class="ph">
+                        <h2>
+                            Import / Export
+                        </h2>
+                    </div>
+
+                    <div class="mb">
+
+                        <div class="field">
+
+                            <label>
+                                Excel / CSV file
+                            </label>
+
+                            <input id="file"
+                                   type="file"
+                                   accept=".xlsx,.xls,.csv">
+
+                        </div>
+
+                        <p class="help">
+                            Use sheets named Sales, Expenses, Due Receipts
+                            and Cash Movements. Keep database field names
+                            as column headers for safest import.
+                        </p>
+
+                        <button class="btn primary"
+                                onclick="importXlsx()">
+                            Import Excel
+                        </button>
+
+                        <button class="btn"
+                                onclick="exportXlsx()">
+                            Export Excel
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- =========================================================
+         MODAL
+    ========================================================== -->
+
+    <div class="modal" id="modal">
+
+        <div class="box">
+
+            <div class="mh">
+
+                <b id="mtitle">
+                    Add
+                </b>
+
+                <button class="close"
+                        onclick="closeForm()">
+                    ×
+                </button>
+
+            </div>
+
+            <div class="mb"
+                 id="mform">
+            </div>
+
+            <div class="mf">
+
+                <button class="btn"
+                        onclick="closeForm()">
+                    Cancel
+                </button>
+
+                <button class="btn primary"
+                        id="save">
+                    Save
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TOAST -->
+
+    <div id="toast"
+         class="toast">
+    </div>
+
+
+    <script>
+
+        /* =========================================================
+           SUPABASE CONFIGURATION
+        ========================================================= */
+
+        const SUPABASE_URL =
+            'PASTE_YOUR_SUPABASE_URL_HERE';
+
+        const SUPABASE_PUBLISHABLE_KEY =
+            'PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE';
+
+        const db = supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+
+        /* =========================================================
+           BASIC HELPERS
+        ========================================================= */
+
+        const $ = (id) => {
+            return document.getElementById(id);
+        };
+
+
+        function money(value) {
+
+            return '₹' +
+                Number(value || 0).toLocaleString(
+                    'en-IN',
+                    {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }
+                );
+        }
+
+
+        function esc(value) {
+
+            return String(value ?? '').replace(
+                /[&<>"']/g,
+                (char) => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[char])
+            );
+        }
+
+
+        function fd(date) {
+
+            if (!date) {
+                return '';
+            }
+
+            return new Date(
+                date + 'T00:00:00'
+            ).toLocaleDateString(
+                'en-IN',
+                {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                }
+            );
+        }
+
+
+        function today() {
+
+            return new Date()
+                .toISOString()
+                .slice(0, 10);
+        }
+
+
+        /* =========================================================
+           TOAST
+        ========================================================= */
+
+        function toast(message, error = false) {
+
+            const element = $('toast');
+
+            element.textContent = message;
+
+            element.style.background =
+                error ? '#b42318' : '#101828';
+
+            element.classList.add('show');
+
+            setTimeout(() => {
+
+                element.classList.remove('show');
+
+            }, 2800);
+        }
+
+
+        /* =========================================================
+           PAGE META
+        ========================================================= */
+
+        const meta = {
+
+            overview: [
+                'Cash Management',
+                'Daily cash, sales and expense management'
+            ],
+
+            daily: [
+                'Daily Cash',
+                'Complete date-wise cash register'
+            ],
+
+            sales: [
+                'Sales',
+                'Original daily sales — never overwritten by due receipts'
+            ],
+
+            expenses: [
+                'Expenses',
+                'Cash and Online/UPI expenses'
+            ],
+
+            due: [
+                'Due Receipts',
+                'Receive old outstanding amounts without changing original sale'
+            ],
+
+            movements: [
+                'Cash Movement',
+                'Bank deposits and owner handovers'
+            ],
+
+            reports: [
+                'Reports',
+                'Daily, monthly and yearly summaries'
+            ],
+
+            import: [
+                'Import / Export',
+                'Bulk Excel data management'
+            ]
+
+        };
+
+
+        /* =========================================================
+           PAGE NAVIGATION
+        ========================================================= */
+
+        function go(page) {
+
+            document
+                .querySelectorAll('.page')
+                .forEach((element) => {
+
+                    element.classList.remove('active');
+
+                });
+
+
+            $(page).classList.add('active');
+
+
+            document
+                .querySelectorAll('.nav button')
+                .forEach((button) => {
+
+                    button.classList.toggle(
+                        'active',
+                        button.dataset.p === page
+                    );
+
+                });
+
+
+            $('title').textContent =
+                meta[page][0];
+
+            $('sub').textContent =
+                meta[page][1];
+
+
+            const actions = {
+
+                overview: loadOverview,
+
+                daily: loadDaily,
+
+                sales: loadSales,
+
+                expenses: loadExpenses,
+
+                due: loadDue,
+
+                movements: loadMovements,
+
+                reports: () => report('daily')
+
+            };
+
+
+            if (actions[page]) {
+                actions[page]();
+            }
+        }
+
+
+        document
+            .querySelectorAll('.nav button')
+            .forEach((button) => {
+
+                button.onclick = () => {
+                    go(button.dataset.p);
+                };
+
+            });
+
+
+        /* =========================================================
+           DATE FILTER INITIALIZATION
+        ========================================================= */
+
+        function dates() {
+
+            [
+                'df',
+                'sf',
+                'ef',
+                'uf',
+                'mf'
+            ].forEach((id) => {
+
+                $(id).value = today();
+
+            });
+
+
+            [
+                'dt',
+                'st',
+                'et',
+                'ut',
+                'mt'
+            ].forEach((id) => {
+
+                $(id).value = today();
+
+            });
+        }
+
+
+        dates();
+
+
+        /* =========================================================
+           DAILY REPORT
+        ========================================================= */
+
+        async function daily(from, to) {
+
+            let query = db
+                .from('cash_daily_report')
+                .select('*')
+                .order('date', {
+                    ascending: false
+                });
+
+
+            if (from) {
+                query = query.gte(
+                    'date',
+                    from
+                );
+            }
+
+
+            if (to) {
+                query = query.lte(
+                    'date',
+                    to
+                );
+            }
+
+
+            const result = await query;
+
+
+            if (result.error) {
+                throw result.error;
+            }
+
+
+            return result.data || [];
+        }
+
+
+        function dhead() {
+
+            return `
+                <tr>
+                    <th>Date</th>
+                    <th>Sale</th>
+                    <th>Cash Sale</th>
+                    <th>Online/UPI</th>
+                    <th>Expense</th>
+                    <th>Due Received</th>
+                    <th>Bank Deposit</th>
+                    <th>Owner Handover</th>
+                    <th>Current Sale</th>
+                    <th>Current Cash</th>
+                </tr>
+            `;
+        }
+
+
+        function drows(rows) {
+
+            if (!rows.length) {
+
+                return `
+                    <tr>
+                        <td colspan="10">
+                            <div class="empty">
+                                No transactions found.
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+            }
+
+
+            return rows.map((row) => {
+
+                return `
+                    <tr>
+
+                        <td>
+                            ${fd(row.date)}
+                        </td>
+
+                        <td class="strong">
+                            ${money(row.sale)}
+                        </td>
+
+                        <td>
+                            ${money(row.cash_sale)}
+                        </td>
+
+                        <td>
+                            ${money(row.online_upi)}
+                        </td>
+
+                        <td>
+                            ${money(row.expense)}
+                        </td>
+
+                        <td>
+                            ${money(row.due_receipt)}
+                        </td>
+
+                        <td>
+                            ${money(row.bank_deposit)}
+                        </td>
+
+                        <td>
+                            ${money(row.owner_handover)}
+                        </td>
+
+                        <td class="strong">
+                            ${money(row.current_sale)}
+                        </td>
+
+                        <td class="strong green">
+                            ${money(row.current_cash)}
+                        </td>
+
+                    </tr>
+                `;
+
+            }).join('');
+        }
+
+
+        /* =========================================================
+           OVERVIEW
+        ========================================================= */
+
+        async function loadOverview() {
+
+            try {
+
+                const rows = await daily(
+                    today(),
+                    today()
+                );
+
+                const row = rows[0] || {};
+
+
+                $('csale').textContent =
+                    money(row.sale);
+
+                $('ccash').textContent =
+                    money(row.current_cash);
+
+                $('cdue').textContent =
+                    money(row.due_receipt);
+
+                $('cexp').textContent =
+                    money(row.expense);
+
+
+                $('oh').innerHTML =
+                    dhead();
+
+                $('ob').innerHTML =
+                    drows(rows);
+
+            } catch (error) {
+
+                toast(
+                    error.message,
+                    true
+                );
+
+            }
+        }
+
+
+        /* =========================================================
+           DAILY CASH
+        ========================================================= */
+
+        async function loadDaily() {
+
+            try {
+
+                const rows = await daily(
+                    $('df').value,
+                    $('dt').value
+                );
+
+
+                $('dh').innerHTML =
+                    dhead();
+
+                $('db').innerHTML =
+                    drows(rows);
+
+            } catch (error) {
+
+                toast(
+                    error.message,
+                    true
+                );
+
+            }
+        }
+
+
+        function todayFilter() {
+
+            dates();
+
+            loadDaily();
+        }
+
+
+        /* =========================================================
+           GENERIC LIST
+        ========================================================= */
+
+        async function list(
+            table,
+            from,
+            to,
+            dateColumn,
+            body,
+            columns,
+            actions
+        ) {
+
+            let query = db
+                .from(table)
+                .select('*')
+                .order(dateColumn, {
+                    ascending: false
+                });
+
+
+            if (from) {
+
+                query = query.gte(
+                    dateColumn,
+                    from
+                );
+
+            }
+
+
+            if (to) {
+
+                query = query.lte(
+                    dateColumn,
+                    to
+                );
+
+            }
+
+
+            const result = await query;
+
+
+            if (result.error) {
+                throw result.error;
+            }
+
+
+            if (!result.data.length) {
+
+                $(body).innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty">
+                                No records found.
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+
+            $(body).innerHTML =
+                result.data.map((row) => {
+
+                    return `
+                        <tr>
+                            ${columns(row)}
+                            <td>
+                                ${actions(row)}
+                            </td>
+                        </tr>
+                    `;
+
+                }).join('');
+        }
+
+
+        /* =========================================================
+           ACTION BUTTONS
+        ========================================================= */
+
+        function act(type, row, reloadFunction) {
+
+            const safeRow =
+                JSON.stringify(row)
+                    .replace(/'/g, '&#39;');
+
+
+            return `
+                <button
+                    class="btn"
+                    onclick='edit${type}(${safeRow})'>
+                    Edit
+                </button>
+
+                <button
+                    class="btn danger"
+                    onclick="del(
+                        '${type}',
+                        '${row.id}',
+                        '${reloadFunction}'
+                    )">
+                    Delete
+                </button>
+            `;
+        }
+
+
+        /* =========================================================
+           SALES
+        ========================================================= */
+
+        async function loadSales() {
+
+            try {
+
+                await list(
+                    'cash_daily_sales',
+                    $('sf').value,
+                    $('st').value,
+                    'sale_date',
+                    'sb',
+
+                    (row) => `
+                        <td>
+                            ${fd(row.sale_date)}
+                        </td>
+
+                        <td class="strong">
+                            ${money(row.total_sale)}
+                        </td>
+
+                        <td>
+                            ${money(row.cash_sale)}
+                        </td>
+
+                        <td>
+                            ${money(row.online_sale)}
+                        </td>
+
+                        <td>
+                            ${money(row.due_sale)}
+                        </td>
+
+                        <td>
+                            ${esc(row.remark)}
+                        </td>
+                    `,
+
+                    (row) =>
+                        act(
+                            'Sale',
+                            row,
+                            'loadSales'
+                        )
+                );
+
+            } catch (error) {
+
+                toast(
+                    error.message,
+                    true
+                );
+
+            }
+        }
+
+
+        /* =========================================================
+           EXPENSES
+        ========================================================= */
+
+        async function loadExpenses() {
+
+            try {
+
+                await list(
+                    'cash_expenses',
+                    $('ef').value,
+                    $('et').value,
+                    'expense_date',
+                    'eb',
+
+                    (row) => `
+                        <td>
+                            ${fd(row.expense_date)}
+                        </td>
+
+                        <td class="strong">
+                            ${money(row.amount)}
+                        </td>
+
+                        <td>
+                            ${esc(row.payment_mode)}
+                        </td>
+
+                        <td>
+                            ${esc(row.category)}
+                        </td>
+
+                        <td>
+                            ${esc(row.remark)}
+                        </td>
+                    `,
+
+                    (row) =>
+                        act(
+                            'Expense',
+                            row,
+                            'loadExpenses'
+                        )
+                );
+
+            } catch (error) {
+
+                toast(
+                    error.message,
+                    true
+                );
+
+            }
+        }
+
+
+        /* =========================================================
+           DUE RECEIPTS
+        ========================================================= */
+
+        async function loadDue() {
+
+            try {
+
+                await list(
+                    'cash_due_receipts',
+                    $('uf').value,
+                    $('ut').value,
+                    'receipt_date',
+                    'ub',
+
+                    (row) => `
+                        <td>
+                            ${fd(row.receipt_date)}
+                        </td>
+
+                        <td>
+                            ${fd(row.against_sale_date)}
+                        </td>
+
+                        <td class="strong">
+                            ${money(row.amount)}
+                        </td>
+
+                        <td>
+                            ${esc(row.payment_mode)}
+                        </td>
+
+                        <td>
+                            ${esc(row.receipt_no)}
+                        </td>
+
+                        <td>
+                            ${esc(row.remark)}
+                        </td>
+                    `,
+
+                    (row) =>
+                        act(
+                            'Due',
+                            row,
+                            'loadDue'
+                        )
+                );
+
+            } catch (error) {
+
+                toast(
+                    error.message,
+                    true
+                );
+
+            }
+        }
+
+
+        /* =========================================================
+           CASH MOVEMENTS
+        ========================================================= */
+
+        async function loadMovements() {
+
+            try {
+
+                await list(
+                    'cash_movements',
+                    $('mf').value,
+                    $('mt').value,
+                    'movement_date',
+                    'mbody',
+
+                    (row) => `
+                        <td>
+                            ${fd(row.movement_date)}
+                        </td>
+
+                        <td>
+                            ${esc(row.movement_type)}
+                        </td>
+
+                        <td class="strong">
+                            ${money(row.amount)}
+                        </td>
+
+                        <td>
+                            ${esc(row.remark)}
+                        </td>
+                    `,
+
+                    (row) =>
+                        act(
+                            'Movement',
+                            row,
+                            'loadMovements'
+                        )
+                );
+
+            } catch (error) {
+
+                toast(
+                    error.message,
+                    true
+                );
+
+            }
+        }
+
+
+        /* =========================================================
+           DELETE
+        ========================================================= */
+
+        async function del(
+            table,
+            id,
+            reloadFunction
+        ) {
+
+            if (
+                !confirm(
+                    'Delete this record?'
+                )
+            ) {
+                return;
+            }
+
+
+            const result = await db
+                .from(table)
+                .delete()
+                .eq('id', id);
+
+
+            if (result.error) {
+
+                toast(
+                    result.error.message,
+                    true
+                );
+
+                return;
+            }
+
+
+            toast(
+                'Record deleted'
+            );
+
+
+            window[reloadFunction]();
+
+            loadOverview();
+        }
+
+
+        /* =========================================================
+           FORM MODAL
+        ========================================================= */
+
+        function openForm(type, row = null) {
+
+            $('modal').classList.add('show');
+
+
+            const names = {
+                sale: 'Sale',
+                expense: 'Expense',
+                due: 'Due Receipt',
+                movement: 'Cash Movement'
+            };
+
+
+            $('mtitle').textContent =
+                (row ? 'Edit ' : 'Add ') +
+                names[type];
+
+
+            let html = '';
+
+
+            /* -----------------------------------------------------
+               SALE FORM
+            ----------------------------------------------------- */
+
+            if (type === 'sale') {
+
+                html = `
+
+                    <div class="form">
+
+                        <div class="field">
+
+                            <label>
+                                Sale Date *
+                            </label>
+
+                            <input
+                                id="a"
+                                type="date"
+                                value="${row?.sale_date || today()}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Total Sale *
+                            </label>
+
+                            <input
+                                id="b"
+                                type="number"
+                                step="0.01"
+                                value="${row?.total_sale ?? ''}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Cash Sale *
+                            </label>
+
+                            <input
+                                id="c"
+                                type="number"
+                                step="0.01"
+                                value="${row?.cash_sale ?? ''}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Online / UPI *
+                            </label>
+
+                            <input
+                                id="d"
+                                type="number"
+                                step="0.01"
+                                value="${row?.online_sale ?? ''}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Due Sale *
+                            </label>
+
+                            <input
+                                id="e"
+                                type="number"
+                                step="0.01"
+                                value="${row?.due_sale ?? ''}">
+
+                        </div>
+
+
+                        <div class="field full">
+
+                            <label>
+                                Remark
+                            </label>
+
+                            <textarea id="f">${esc(
+                                row?.remark || ''
+                            )}</textarea>
+
+                        </div>
+
+                    </div>
+
+                    <p class="help">
+                        Cash + Online/UPI + Due must equal Total Sale.
+                    </p>
+                `;
+            }
+
+
+            /* -----------------------------------------------------
+               EXPENSE FORM
+            ----------------------------------------------------- */
+
+            if (type === 'expense') {
+
+                html = `
+
+                    <div class="form">
+
+                        <div class="field">
+
+                            <label>
+                                Date *
+                            </label>
+
+                            <input
+                                id="a"
+                                type="date"
+                                value="${row?.expense_date || today()}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Amount *
+                            </label>
+
+                            <input
+                                id="b"
+                                type="number"
+                                step="0.01"
+                                value="${row?.amount ?? ''}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Payment Mode *
+                            </label>
+
+                            <select id="c">
+
+                                <option
+                                    ${
+                                        row?.payment_mode === 'Cash'
+                                            ? 'selected'
+                                            : ''
+                                    }>
+                                    Cash
+                                </option>
+
+                                <option
+                                    ${
+                                        row?.payment_mode === 'Online/UPI'
+                                            ? 'selected'
+                                            : ''
+                                    }>
+                                    Online/UPI
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Category
+                            </label>
+
+                            <input
+                                id="d"
+                                value="${esc(
+                                    row?.category || ''
+                                )}">
+
+                        </div>
+
+
+                        <div class="field full">
+
+                            <label>
+                                Remark
+                            </label>
+
+                            <textarea id="e">${esc(
+                                row?.remark || ''
+                            )}</textarea>
+
+                        </div>
+
+                    </div>
+                `;
+            }
+
+
+            /* -----------------------------------------------------
+               DUE RECEIPT FORM
+            ----------------------------------------------------- */
+
+            if (type === 'due') {
+
+                html = `
+
+                    <div class="form">
+
+                        <div class="field">
+
+                            <label>
+                                Receipt Date *
+                            </label>
+
+                            <input
+                                id="a"
+                                type="date"
+                                value="${row?.receipt_date || today()}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Against Sale Date *
+                            </label>
+
+                            <input
+                                id="b"
+                                type="date"
+                                value="${row?.against_sale_date || today()}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Amount *
+                            </label>
+
+                            <input
+                                id="c"
+                                type="number"
+                                step="0.01"
+                                value="${row?.amount ?? ''}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Payment Mode *
+                            </label>
+
+                            <select id="d">
+
+                                <option
+                                    ${
+                                        row?.payment_mode === 'Cash'
+                                            ? 'selected'
+                                            : ''
+                                    }>
+                                    Cash
+                                </option>
+
+                                <option
+                                    ${
+                                        row?.payment_mode === 'Online/UPI'
+                                            ? 'selected'
+                                            : ''
+                                    }>
+                                    Online/UPI
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Receipt No.
+                            </label>
+
+                            <input
+                                id="e"
+                                value="${esc(
+                                    row?.receipt_no || ''
+                                )}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Remark
+                            </label>
+
+                            <input
+                                id="f"
+                                value="${esc(
+                                    row?.remark || ''
+                                )}">
+
+                        </div>
+
+                    </div>
+
+                    <p class="help">
+                        This never changes the original sale.
+                    </p>
+                `;
+            }
+
+
+            /* -----------------------------------------------------
+               CASH MOVEMENT FORM
+            ----------------------------------------------------- */
+
+            if (type === 'movement') {
+
+                html = `
+
+                    <div class="form">
+
+                        <div class="field">
+
+                            <label>
+                                Date *
+                            </label>
+
+                            <input
+                                id="a"
+                                type="date"
+                                value="${row?.movement_date || today()}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Movement Type *
+                            </label>
+
+                            <select id="b">
+
+                                <option
+                                    ${
+                                        row?.movement_type ===
+                                        'Cash Deposit in Bank'
+                                            ? 'selected'
+                                            : ''
+                                    }>
+                                    Cash Deposit in Bank
+                                </option>
+
+                                <option
+                                    ${
+                                        row?.movement_type ===
+                                        'Cash Handover to Owner'
+                                            ? 'selected'
+                                            : ''
+                                    }>
+                                    Cash Handover to Owner
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Amount *
+                            </label>
+
+                            <input
+                                id="c"
+                                type="number"
+                                step="0.01"
+                                value="${row?.amount ?? ''}">
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Remark
+                            </label>
+
+                            <input
+                                id="d"
+                                value="${esc(
+                                    row?.remark || ''
+                                )}">
+
+                        </div>
+
+                    </div>
+                `;
+            }
+
+
+            $('mform').innerHTML = html;
+
+
+            $('save').onclick = () => {
+                save(type, row);
+            };
+        }
+
+
+        function closeForm() {
+
+            $('modal').classList.remove('show');
+        }
+
+
+        /* =========================================================
+           SAVE
+        ========================================================= */
+
+        async function save(type, row) {
+
+            let table;
+            let payload;
+
+
+            /* -----------------------------------------------------
+               SALE
+            ----------------------------------------------------- */
+
+            if (type === 'sale') {
+
+                table = 'cash_daily_sales';
+
+
+                payload = {
+
+                    sale_date: $('a').value,
+
+                    total_sale:
+                        Number($('b').value),
+
+                    cash_sale:
+                        Number($('c').value),
+
+                    online_sale:
+                        Number($('d').value),
+
+                    due_sale:
+                        Number($('e').value),
+
+                    remark:
+                        $('f').value
+                };
+
+
+                const calculatedTotal =
+                    payload.cash_sale +
+                    payload.online_sale +
+                    payload.due_sale;
+
+
+                if (
+                    Math.round(
+                        calculatedTotal * 100
+                    ) !==
+                    Math.round(
+                        payload.total_sale * 100
+                    )
+                ) {
+
+                    toast(
+                        'Cash + Online/UPI + Due must equal Total Sale.',
+                        true
+                    );
+
+                    return;
+                }
+            }
+
+
+            /* -----------------------------------------------------
+               EXPENSE
+            ----------------------------------------------------- */
+
+            if (type === 'expense') {
+
+                table = 'cash_expenses';
+
+
+                payload = {
+
+                    expense_date:
+                        $('a').value,
+
+                    amount:
+                        Number($('b').value),
+
+                    payment_mode:
+                        $('c').value,
+
+                    category:
+                        $('d').value,
+
+                    remark:
+                        $('e').value
+                };
+            }
+
+
+            /* -----------------------------------------------------
+               DUE RECEIPT
+            ----------------------------------------------------- */
+
+            if (type === 'due') {
+
+                table = 'cash_due_receipts';
+
+
+                payload = {
+
+                    receipt_date:
+                        $('a').value,
+
+                    against_sale_date:
+                        $('b').value,
+
+                    amount:
+                        Number($('c').value),
+
+                    payment_mode:
+                        $('d').value,
+
+                    receipt_no:
+                        $('e').value,
+
+                    remark:
+                        $('f').value
+                };
+            }
+
+
+            /* -----------------------------------------------------
+               CASH MOVEMENT
+            ----------------------------------------------------- */
+
+            if (type === 'movement') {
+
+                table = 'cash_movements';
+
+
+                payload = {
+
+                    movement_date:
+                        $('a').value,
+
+                    movement_type:
+                        $('b').value,
+
+                    amount:
+                        Number($('c').value),
+
+                    remark:
+                        $('d').value
+                };
+            }
+
+
+            /* -----------------------------------------------------
+               INSERT / UPDATE
+            ----------------------------------------------------- */
+
+            let query;
+
+
+            if (row) {
+
+                query = db
+                    .from(table)
+                    .update(payload)
+                    .eq('id', row.id);
+
+            } else {
+
+                query = db
+                    .from(table)
+                    .insert(payload);
+            }
+
+
+            const result = await query;
+
+
+            if (result.error) {
+
+                toast(
+                    result.error.message,
+                    true
+                );
+
+                return;
+            }
+
+
+            closeForm();
+
+
+            toast(
+                row
+                    ? 'Updated successfully'
+                    : 'Saved successfully'
+            );
+
+
+            refresh();
+        }
+
+
+        /* =========================================================
+           EDIT FUNCTIONS
+        ========================================================= */
+
+        function editSale(row) {
+            openForm('sale', row);
+        }
+
+
+        function editExpense(row) {
+            openForm('expense', row);
+        }
+
+
+        function editDue(row) {
+            openForm('due', row);
+        }
+
+
+        function editMovement(row) {
+            openForm('movement', row);
+        }
+
+
+        /* =========================================================
+           REPORTS
+        ========================================================= */
+
+        async function report(type) {
+
+            document
+                .querySelectorAll('.tabs button')
+                .forEach((button) => {
+
+                    button.classList.remove('active');
+
+                });
+
+
+            const tabId =
+                type === 'daily'
+                    ? 'rd'
+                    : type === 'monthly'
+                        ? 'rm'
+                        : 'ry';
+
+
+            $(tabId).classList.add('active');
+
+
+            const table =
+                type === 'daily'
+                    ? 'cash_daily_report'
+                    : type === 'monthly'
+                        ? 'cash_monthly_report'
+                        : 'cash_yearly_report';
+
+
+            const orderColumn =
+                type === 'daily'
+                    ? 'date'
+                    : type === 'monthly'
+                        ? 'month'
+                        : 'year';
+
+
+            const result = await db
+                .from(table)
+                .select('*')
+                .order(orderColumn, {
+                    ascending: false
+                });
+
+
+            if (result.error) {
+
+                toast(
+                    result.error.message,
+                    true
+                );
+
+                return;
+            }
+
+
+            const rows =
+                result.data || [];
+
+
+            if (type === 'daily') {
+
+                $('rh').innerHTML =
+                    dhead();
+
+                $('rb').innerHTML =
+                    drows(rows);
+
+                return;
+            }
+
+
+            $('rh').innerHTML = `
+
+                <tr>
+
+                    <th>
+                        ${
+                            type === 'monthly'
+                                ? 'Month'
+                                : 'Year'
+                        }
+                    </th>
+
+                    <th>Sale</th>
+                    <th>Cash</th>
+                    <th>Online/UPI</th>
+                    <th>Expense</th>
+                    <th>Due Received</th>
+                    <th>Bank Deposit</th>
+                    <th>Owner Handover</th>
+                    <th>Current Sale</th>
+                    <th>Current Cash</th>
+
+                </tr>
+            `;
+
+
+            if (!rows.length) {
+
+                $('rb').innerHTML = `
+
+                    <tr>
+
+                        <td colspan="10">
+
+                            <div class="empty">
+                                No report data.
+                            </div>
+
+                        </td>
+
+                    </tr>
+                `;
+
+                return;
+            }
+
+
+            $('rb').innerHTML =
+                rows.map((row) => {
+
+                    return `
+
+                        <tr>
+
+                            <td>
+                                ${
+                                    type === 'monthly'
+                                        ? esc(row.month_name)
+                                        : row.year
+                                }
+                            </td>
+
+                            <td class="strong">
+                                ${money(row.sale)}
+                            </td>
+
+                            <td>
+                                ${money(row.cash_sale)}
+                            </td>
+
+                            <td>
+                                ${money(row.online_upi)}
+                            </td>
+
+                            <td>
+                                ${money(row.expense)}
+                            </td>
+
+                            <td>
+                                ${money(row.due_receipt)}
+                            </td>
+
+                            <td>
+                                ${money(row.bank_deposit)}
+                            </td>
+
+                            <td>
+                                ${money(row.owner_handover)}
+                            </td>
+
+                            <td class="strong">
+                                ${money(row.current_sale)}
+                            </td>
+
+                            <td class="strong green">
+                                ${money(row.current_cash)}
+                            </td>
+
+                        </tr>
+                    `;
+
+                }).join('');
+        }
+
+
+        /* =========================================================
+           EXCEL EXPORT
+        ========================================================= */
+
+        async function exportXlsx() {
+
+            try {
+
+                const results =
+                    await Promise.all([
+
+                        db
+                            .from('cash_daily_sales')
+                            .select('*'),
+
+                        db
+                            .from('cash_expenses')
+                            .select('*'),
+
+                        db
+                            .from('cash_due_receipts')
+                            .select('*'),
+
+                        db
+                            .from('cash_movements')
+                            .select('*')
+
+                    ]);
+
+
+                const failed =
+                    results.find(
+                        (result) => result.error
+                    );
+
+
+                if (failed) {
+                    throw failed.error;
+                }
+
+
+                const workbook =
+                    XLSX.utils.book_new();
+
+
+                const sheets = [
+
+                    [
+                        'Sales',
+                        results[0].data
+                    ],
+
+                    [
+                        'Expenses',
+                        results[1].data
+                    ],
+
+                    [
+                        'Due Receipts',
+                        results[2].data
+                    ],
+
+                    [
+                        'Cash Movements',
+                        results[3].data
+                    ]
+
+                ];
+
+
+                sheets.forEach(
+                    ([name, data]) => {
+
+                        const worksheet =
+                            XLSX.utils.json_to_sheet(
+                                data || []
+                            );
+
+
+                        XLSX.utils.book_append_sheet(
+                            workbook,
+                            worksheet,
+                            name
+                        );
+
+                    }
+                );
+
+
+                XLSX.writeFile(
+                    workbook,
+                    'Cash-Management-Export.xlsx'
+                );
+
+
+                toast(
+                    'Excel exported'
+                );
+
+            } catch (error) {
+
+                toast(
+                    error.message,
+                    true
+                );
+            }
+        }
+
+
+        /* =========================================================
+           EXCEL IMPORT
+        ========================================================= */
+
+        async function importXlsx() {
+
+            const file =
+                $('file').files[0];
+
+
+            if (!file) {
+
+                toast(
+                    'Choose an Excel file first.',
+                    true
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const workbook =
+                    XLSX.read(
+                        await file.arrayBuffer(),
+                        {
+                            type: 'array'
+                        }
+                    );
+
+
+                const config = [
+
+                    [
+                        'Sales',
+                        'cash_daily_sales'
+                    ],
+
+                    [
+                        'Expenses',
+                        'cash_expenses'
+                    ],
+
+                    [
+                        'Due Receipts',
+                        'cash_due_receipts'
+                    ],
+
+                    [
+                        'Cash Movements',
+                        'cash_movements'
+                    ]
+
+                ];
+
+
+                let imported = 0;
+
+
+                for (
+                    const [sheetName, tableName]
+                    of config
+                ) {
+
+                    if (
+                        !workbook.Sheets[sheetName]
+                    ) {
+                        continue;
+                    }
+
+
+                    const rows =
+                        XLSX.utils.sheet_to_json(
+                            workbook.Sheets[sheetName],
+                            {
+                                defval: ''
+                            }
+                        );
+
+
+                    if (!rows.length) {
+                        continue;
+                    }
+
+
+                    const result =
+                        await db
+                            .from(tableName)
+                            .insert(rows);
+
+
+                    if (result.error) {
+                        throw result.error;
+                    }
+
+
+                    imported +=
+                        rows.length;
+                }
+
+
+                toast(
+                    imported +
+                    ' records imported'
+                );
+
+
+                refresh();
+
+            } catch (error) {
+
+                toast(
+                    error.message,
+                    true
+                );
+            }
+        }
+
+
+        /* =========================================================
+           REFRESH
+        ========================================================= */
+
+        async function refresh() {
+
+            await loadOverview();
+
+
+            const activePage =
+                document
+                    .querySelector('.page.active')
+                    ?.id;
+
+
+            if (
+                activePage === 'daily'
+            ) {
+                await loadDaily();
+            }
+
+
+            if (
+                activePage === 'sales'
+            ) {
+                await loadSales();
+            }
+
+
+            if (
+                activePage === 'expenses'
+            ) {
+                await loadExpenses();
+            }
+
+
+            if (
+                activePage === 'due'
+            ) {
+                await loadDue();
+            }
+
+
+            if (
+                activePage === 'movements'
+            ) {
+                await loadMovements();
+            }
+
+
+            if (
+                activePage === 'reports'
+            ) {
+                await report('daily');
+            }
+        }
+
+
+        /* =========================================================
+           INITIAL LOAD
+        ========================================================= */
+
+        loadOverview();
+
+    </script>
+
+</body>
+
+</html>
